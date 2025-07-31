@@ -10,6 +10,7 @@ env:
   ECS_SERVICE: opl-website-service        # Your ECS service name
   ECS_CLUSTER: opl-cluster                # Your ECS cluster name
   TASK_DEFINITION_FAMILY: opl-website-tas # Task definition family name
+  VERSION: ${{ github.sha }}              # Version tag for the image
 
 permissions:
   contents: read
