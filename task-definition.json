@@ -5,6 +5,7 @@
   "memory": "512",
   "requiresCompatibilities": ["FARGATE"],
   "executionRoleArn": "arn:aws:iam::949848044200:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::949848044200:role/opl-ecs-task-role", // Added task role
   "networkConfiguration": {
     "awsvpcConfiguration": {
       "subnets": ["subnet-0fb274970de616fd5"],
