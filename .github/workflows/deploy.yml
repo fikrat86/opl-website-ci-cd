@@ -7,9 +7,9 @@ on:
 env:
   AWS_REGION: us-east-1                   # Your AWS region
   ECR_REPOSITORY: my-website              # Your ECR repository name
-  ECS_SERVICE: opl-website-service2        # Your ECS service name
-  ECS_CLUSTER: opl-cluster2               # Your ECS cluster name
-  TASK_DEFINITION_FAMILY: opl-website-task # Task definition family name
+  ECS_SERVICE: opl-website-service        # Your ECS service name
+  ECS_CLUSTER: opl-cluster               # Your ECS cluster name
+  TASK_DEFINITION_FAMILY: opl-website-tas # Task definition family name
 
 permissions:
   contents: read
