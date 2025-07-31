@@ -1,11 +1,42 @@
 {
   "family": "opl-website-tas",
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "requiresCompatibilities": ["FARGATE"],
+  "executionRoleArn": "arn:aws:iam::949848044200:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
       "name": "opl-website-container",
-      "image": "placeholder-image",
-      "portMappings": [{ "containerPort": 80, "hostPort": 80 }]
-      // ... other settings ...
+      "image": "949848044200.dkr.ecr.us-east-1.amazonaws.com/my-website:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-create-group": "true",
+          "awslogs-group": "/ecs/opl-website-tas",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
     }
   ]
+  /* Note: Network configuration (subnets and security group) is typically set in the ECS service.
+     If needed, add:
+     "networkConfiguration": {
+       "awsvpcConfiguration": {
+         "subnets": ["subnet-12345678", "subnet-87654321"],
+         "securityGroups": ["sg-12345678"],
+         "assignPublicIp": "ENABLED"
+       }
+     }
+     Replace subnet and security group IDs with your actual values from opl-vpc.
+  */
 }
