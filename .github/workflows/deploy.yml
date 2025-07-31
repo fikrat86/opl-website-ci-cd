@@ -9,7 +9,7 @@ env:
   ECR_REPOSITORY: my-website              # Your ECR repository name
   ECS_SERVICE: opl-website-service        # Your ECS service name
   ECS_CLUSTER: opl-cluster                # Your ECS cluster name
-  # Removed ECS_TASK_DEFINITION and CONTAINER_NAME since using existing task definition
+  TASK_DEFINITION_FAMILY: opl-website-tas # Task definition family name
 
 permissions:
   contents: read
@@ -41,10 +41,18 @@ jobs:
         docker tag $ECR_REPOSITORY:$VERSION 949848044200.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:$VERSION
         docker push 949848044200.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:$VERSION
 
+    - name: Render and deploy Amazon ECS task definition
+      id: render-task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v2
+      with:
+        task-definition: ${{ env.TASK_DEFINITION_FAMILY }}
+        container-name: opl-website-container # Replace with your actual container name
+        image: 949848044200.dkr.ecr.us-east-1.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.VERSION }}
+
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v2
       with:
-        task-definition: opl-website-tas    # Task definition family name
+        task-definition: ${{ steps.render-task-def.outputs.task-definition }}
         service: ${{ env.ECS_SERVICE }}
         cluster: ${{ env.ECS_CLUSTER }}
         wait-for-service-stability: true
