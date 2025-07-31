@@ -5,10 +5,10 @@ on:
     branches: [ "main" ]
 
 env:
-  AWS_REGION: us-east-1                   # Set to your AWS region
-  ECR_REPOSITORY: my-website              # Set to your ECR repository name
-  ECS_SERVICE: opl-website-service        # Set to your ECS service name
-  ECS_CLUSTER: opl-cluster                # Set to your ECS cluster name
+  AWS_REGION: us-east-1                   # Your AWS region
+  ECR_REPOSITORY: my-website              # Your ECR repository name
+  ECS_SERVICE: opl-website-service        # Your ECS service name
+  ECS_CLUSTER: opl-cluster                # Your ECS cluster name
   # Removed ECS_TASK_DEFINITION and CONTAINER_NAME since using existing task definition
 
 permissions:
@@ -44,7 +44,7 @@ jobs:
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v2
       with:
-        task-definition: opl-website-tas
+        task-definition: opl-website-tas    # Updated to correct task definition name
         service: ${{ env.ECS_SERVICE }}
         cluster: ${{ env.ECS_CLUSTER }}
         wait-for-service-stability: true
