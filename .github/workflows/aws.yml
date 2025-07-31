@@ -5,12 +5,14 @@ on:
     branches: [ "main" ]
 
 env:
-  AWS_REGION: us-east-1                   # Your AWS region
-  ECR_REPOSITORY: my-website              # Your ECR repository name
-  ECS_SERVICE: opl-website-service        # Your ECS service name
-  ECS_CLUSTER: opl-cluster                # Your ECS cluster name
-  # No ECS_TASK_DEFINITION or CONTAINER_NAME needed for existing task definition
-
+  AWS_REGION: MY_AWS_REGION                   # set this to your preferred AWS region, e.g. us-west-1
+  ECR_REPOSITORY: MY_ECR_REPOSITORY           # set this to your Amazon ECR repository name
+  ECS_SERVICE: MY_ECS_SERVICE                 # set this to your Amazon ECS service name
+  ECS_CLUSTER: MY_ECS_CLUSTER                 # set this to your Amazon ECS cluster name
+  ECS_TASK_DEFINITION: MY_ECS_TASK_DEFINITION # set this to the path to your Amazon ECS task definition
+                                               
+  CONTAINER_NAME: MY_CONTAINER_NAME           # set this to the name of the container in the
+                                               # containerDefinitions section of your task definition
 permissions:
   contents: read
 
