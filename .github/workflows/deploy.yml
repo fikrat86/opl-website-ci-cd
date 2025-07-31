@@ -43,7 +43,7 @@ jobs:
 
     - name: Render and deploy Amazon ECS task definition
       id: render-task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1  # Changed to v1
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: ${{ env.TASK_DEFINITION_FAMILY }}
         container-name: opl-website-container # Replace with your actual container name
