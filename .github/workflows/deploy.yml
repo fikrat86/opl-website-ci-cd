@@ -5,11 +5,10 @@ on:
     branches: [ "main" ]
 
 env:
-  AWS_REGION: us-east-1                   # Your AWS region
-  ECR_REPOSITORY: my-website              # Your ECR repository name
-  ECS_SERVICE: opl-website-service        # Your ECS service name
-  ECS_CLUSTER: opl-cluster               # Your ECS cluster name
-  TASK_DEFINITION_FAMILY: opl-website-tas # Task definition family name
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: my-website
+  ECS_SERVICE: opl-website-service
+  ECS_CLUSTER: opl-cluster
 
 permissions:
   contents: read
@@ -21,38 +20,49 @@ jobs:
     environment: production
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Login to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v2
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Extract version and build, tag, and push image to Amazon ECR
-      run: |
-        VERSION=$(date +%Y%m%d%H%M%S)
-        docker build -t $ECR_REPOSITORY:$VERSION .
-        docker tag $ECR_REPOSITORY:$VERSION 949848044200.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:$VERSION
-        docker push 949848044200.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:$VERSION
+      # The version tag is now a variable that can be reused
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-and-push
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}  # Use a unique Git SHA as the tag
+        run: |
+          # Use the ECR registry and a unique tag from the environment
+          FULL_IMAGE_NAME=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "Building image $FULL_IMAGE_NAME"
+          docker build -t $FULL_IMAGE_NAME .
+          echo "Pushing image $FULL_IMAGE_NAME to ECR"
+          docker push $FULL_IMAGE_NAME
+          # Output the full image name for the next step to use
+          echo "::set-output name=image::$FULL_IMAGE_NAME"
+          
+      - name: Render Amazon ECS task definition
+        id: render-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          # This must be the path to your JSON file, not the family name.
+          task-definition: task-definition.json
+          container-name: opl-website-container
+          # Use the output from the previous step for the new image tag
+          image: ${{ steps.build-and-push.outputs.image }}
 
-    - name: Render and deploy Amazon ECS task definition
-      id: render-task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: ${{ env.TASK_DEFINITION_FAMILY }}
-        container-name: opl-website-container # Replace with your actual container name
-        image: 949848044200.dkr.ecr.us-east-1.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.VERSION }}
-
-    - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-      with:
-        task-definition: ${{ steps.render-task-def.outputs.task-definition }}
-        service: ${{ env.ECS_SERVICE }}
-        cluster: ${{ env.ECS_CLUSTER }}
-        wait-for-service-stability: true
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
