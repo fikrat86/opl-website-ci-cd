@@ -1,64 +1,54 @@
-name: Deploy to Amazon ECS
+# This workflow uses the OIDC trust policy to securely assume an IAM role.
+name: Deploy to ECS with Assume Role
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
-env:
-  AWS_REGION: us-east-1                   # Your AWS region
-  ECR_REPOSITORY: my-website              # Your ECR repository name
-  ECS_SERVICE: opl-website-tas-service        # Your ECS service name  opl-website-tas-service
-  ECS_CLUSTER: opl-cluster                # Your ECS cluster name
-  TASK_DEFINITION_PATH: task-definition.json # Path to your task definition file
-  SUBNETS: "subnet-0fb274970de616fd5"     # Your subnet
-  SECURITY_GROUPS: "sg-0b582fe77b4fb4648" # Your security group ID for frontend-sg
-  ROLE_ARN: arn:aws:iam::949848044200:role/opl-ecs-task-role
-
+# The permissions block is required for OIDC to generate a token.
 permissions:
+  id-token: write
   contents: read
 
 jobs:
   deploy:
-    name: Deploy
     runs-on: ubuntu-latest
-    environment: production
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-       # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-       # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-        role-to-assume: ${{ env.ROLE_ARN }}
-        
+      # The configure-aws-credentials action is the key step.
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          # This is the ARN of the IAM role your workflow will assume.
+          # This role MUST have the OIDC trust policy from the Canvas applied.
+          role-to-assume: "arn:aws:iam::949848044200:role/github-actions-deploy-role"
+          aws-region: us-east-1
 
-    - name: Login to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v2
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Extract version and build, tag, and push image to Amazon ECR
-      run: |
-        VERSION=$(date +%Y%m%d%H%M%S)
-        docker build -t $ECR_REPOSITORY:$VERSION .
-        docker tag $ECR_REPOSITORY:$VERSION 949848044200.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:$VERSION
-        docker push 949848044200.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:$VERSION
+      - name: Build and push Docker image to ECR
+        run: |
+          IMAGE_URI="949848044200.dkr.ecr.us-east-1.amazonaws.com/my-website:latest"
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
 
-    - name: Render and deploy Amazon ECS task definition
-      id: render-task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: ${{ env.TASK_DEFINITION_PATH }}
-        container-name: opl-website-container
-        image: 949848044200.dkr.ecr.us-east-1.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.VERSION }}
+      - name: Fill in the new image in the task definition
+        id: fill-in-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: opl-website-container
+          image: "949848044200.dkr.ecr.us-east-1.amazonaws.com/my-website:latest"
 
-    - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-      with:
-        task-definition: ${{ steps.render-task-def.outputs.task-definition }}
-        service: ${{ env.ECS_SERVICE }}
-        cluster: ${{ env.ECS_CLUSTER }}
-        network-configuration: "{\"awsvpcConfiguration\":{\"subnets\":[\"${{ env.SUBNETS }}\"],\"securityGroups\":[\"${{ env.SECURITY_GROUPS }}\"],\"assignPublicIp\":\"ENABLED\"}}"
-        wait-for-service-stability: true
+      - name: Deploy to ECS service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.fill-in-task-def.outputs.task-definition }}
+          service: opl-website-service
+          cluster: opl-website-cluster
+          wait-for-service-stability: true
