@@ -4,8 +4,8 @@
   "cpu": "256",
   "memory": "512",
   "requiresCompatibilities": ["FARGATE"],
-  "executionRoleArn": "arn:aws:iam::949848044200:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::949848044200:role/opl-ecs-task-role",
+  #"executionRoleArn": "arn:aws:iam::949848044200:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::949848044200:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS", 
   "networkConfiguration": {
     "awsvpcConfiguration": {
       "subnets": ["subnet-0fb274970de616fd5"],
