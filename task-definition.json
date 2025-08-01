@@ -17,7 +17,7 @@
     {
       "name": "opl-website-container",
       "image": "949848044200.dkr.ecr.us-east-1.amazonaws.com/my-website:latest",
-      "essential": true,
+      "essential": "true",
       "portMappings": [
         {
           "containerPort": 80,
