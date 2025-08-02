@@ -48,6 +48,7 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.fill-in-task-def.outputs.task-definition }}
-          service: opl-website-service
+          # The service name was corrected to match the one in your cluster.
+          service: opl-website-tas-service
           cluster: opl-cluster
           wait-for-service-stability: true
