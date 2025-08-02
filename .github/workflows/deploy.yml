@@ -22,9 +22,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          # This is the ARN of the IAM role your workflow will assume.
-          # This role MUST have the OIDC trust policy from the Canvas applied.
-          role-to-assume: "arn:aws:iam::949848044200:role/github-actions-deploy-role"
+          # Use the correct role name from your IAM roles list.
+          role-to-assume: "arn:aws:iam::949848044200:role/opl-ecs-task-role"
           aws-region: us-east-1
 
       - name: Login to Amazon ECR
