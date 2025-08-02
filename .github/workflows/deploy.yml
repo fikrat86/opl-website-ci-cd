@@ -49,5 +49,5 @@ jobs:
         with:
           task-definition: ${{ steps.fill-in-task-def.outputs.task-definition }}
           service: opl-website-service
-          cluster: opl-website-cluster
+          cluster: opl-cluster
           wait-for-service-stability: true
