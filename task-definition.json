@@ -1,6 +1,6 @@
 {
   "family": "opl-website-task",
-  "taskRoleArn": "arn:aws:iam::949848044200:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::949848044200:role/opl-ecs-task-role",
   "executionRoleArn": "arn:aws:iam::949848044200:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
