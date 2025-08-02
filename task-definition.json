@@ -1,23 +1,14 @@
 {
-  "family": "opl-website-tas",
-  "networkMode": "awsvpc",
-  "cpu": "256",
-  "memory": "512",
-  "requiresCompatibilities": ["FARGATE"],
- "executionRoleArn": "arn:aws:iam::949848044200:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::949848044200:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS", 
-  "networkConfiguration": {
-    "awsvpcConfiguration": {
-      "subnets": ["subnet-0fb274970de616fd5"],
-      "securityGroups": ["sg-0b582fe77b4fb4648"],
-      "assignPublicIp": "ENABLED"
-    }
-  },
+  "family": "opl-website-task",
+  "taskRoleArn": "arn:aws:iam::949848044200:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::949848044200:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
       "name": "opl-website-container",
       "image": "949848044200.dkr.ecr.us-east-1.amazonaws.com/my-website:latest",
-      "essential": "true",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
       "portMappings": [
         {
           "containerPort": 80,
@@ -35,5 +26,10 @@
         }
       }
     }
-  ]
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512"
 }
