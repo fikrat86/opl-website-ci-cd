@@ -2,6 +2,7 @@
   "family": "opl-website-task",
   "taskRoleArn": "arn:aws:iam::949848044200:role/opl-ecs-task-role",
   "executionRoleArn": "arn:aws:iam::949848044200:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
   "containerDefinitions": [
     {
       "name": "opl-website-container",
