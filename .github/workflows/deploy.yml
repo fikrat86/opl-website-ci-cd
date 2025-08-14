@@ -5,12 +5,11 @@ on:
     branches: [ "main" ]
 
 env:
-  AWS_REGION: us-east-1                   # Your AWS region us-east
+  AWS_REGION: us-east-1                   # Your AWS region
   ECR_REPOSITORY: my-website              # Your ECR repository name
   ECS_SERVICE: opl-website-service        # Your ECS service name
   ECS_CLUSTER: opl-cluster                # Your ECS cluster name
   TASK_DEFINITION_FAMILY: opl-website-tas # Task definition family name
-  VERSION: ${{ github.sha }}              # Version tag for the image
 
 permissions:
   contents: read
@@ -44,7 +43,7 @@ jobs:
 
     - name: Render and deploy Amazon ECS task definition
       id: render-task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v2
+      uses: aws-actions/amazon-ecs-render-task-definition@v1  # Changed to v1
       with:
         task-definition: ${{ env.TASK_DEFINITION_FAMILY }}
         container-name: opl-website-container # Replace with your actual container name
