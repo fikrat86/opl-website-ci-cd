@@ -1,0 +1,36 @@
+{
+  "family": "opl-website-task",
+  "taskRoleArn": "arn:aws:iam::949848044200:role/opl-ecs-task-role",
+  "executionRoleArn": "arn:aws:iam::949848044200:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "opl-website-container",
+      "image": "949848044200.dkr.ecr.us-east-1.amazonaws.com/my-website:latest",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-create-group": "true",
+          "awslogs-group": "/ecs/opl-website-tas",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512"
+}
